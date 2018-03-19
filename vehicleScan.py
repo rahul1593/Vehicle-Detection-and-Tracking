@@ -133,3 +133,31 @@ def process_image(img, svc, X_scaler, pdata):
                         pdata["pix_per_cell"], pdata["cell_per_block"], pdata["inc_spatial"], pdata["spatial"],
                         pdata["inc_hist"], pdata["hbins"], pdata["overlap"], pdata["trained_win_size"], pdata["windows"])
     return heat_map
+
+def get_processed_frame(img):
+    global hot_frames, svc, X_scaler, proc_data
+    
+    heat_map = process_image(img, svc, X_scaler, proc_data)
+    
+    heat_map.astype(np.float64)
+    nheat_map = np.zeros_like(heat_map)
+    fln = len(hot_frames)
+    for i in range(fln):
+        nheat_map = nheat_map + hot_frames[i]
+    nheat_map = (nheat_map + heat_map)/(fln+1)
+    
+    nheat_map = (nheat_map/np.max(nheat_map))*255
+    nheat_map.astype(np.uint8)
+    # remove unwanted heat by thresholding
+    nheat_map = cool_heat(nheat_map, 115)
+    # add frame to buffer
+    hot_frames.append(cool_heat(heat_map, 13))
+    if len(hot_frames) > 10:
+        hot_frames.pop(0)
+    # generate labels for hot boxes
+    labels = label(nheat_map)
+    op = draw_labeled_bboxes(img, labels)
+    mini_hm = cv2.resize(nheat_map, (360, 240))
+    mini_hm = np.dstack((mini_hm, np.zeros_like(mini_hm), np.zeros_like(mini_hm)))
+    op[0:240, op.shape[1]-360:op.shape[1]] = mini_hm
+    return op
