@@ -52,9 +52,9 @@ def get_hog_feature_all_channels(img, orient, pix_per_cell, cell_per_block):
     ch2 = img[:,:,1]
     ch3 = img[:,:,2]
     hf_ch1 = get_hog_features(ch1, orient, pix_per_cell, cell_per_block, vis=False, feature_vec=False)
-    hf_ch2 = get_hog_features(ch2, orient, pix_per_cell, cell_per_block, vis=False, feature_vec=False)
-    hf_ch3 = get_hog_features(ch3, orient, pix_per_cell, cell_per_block, vis=False, feature_vec=False)
-    return hf_ch1, hf_ch2, hf_ch3
+    #hf_ch2 = get_hog_features(ch2, orient, pix_per_cell, cell_per_block, vis=False, feature_vec=False)
+    #hf_ch3 = get_hog_features(ch3, orient, pix_per_cell, cell_per_block, vis=False, feature_vec=False)
+    return hf_ch1#, hf_ch2, hf_ch3
 
 # Define a function to extract features from a list of images
 # Have this function call bin_spatial() and color_hist()
@@ -67,8 +67,8 @@ def extract_features(imgs, cspace='RGB', include_spatial=True, spatial_size=(32,
     for file in imgs:
         # Read in each one by one
         img = cv2.imread(file)
-        img_i = np.invert(img)
-        for image in [img, img_i]:
+        #img_i = np.invert(img)
+        for image in [img]:
             img_features = []
             # apply color conversion if other than 'RGB'
             if cspace != 'RGB':
@@ -92,52 +92,12 @@ def extract_features(imgs, cspace='RGB', include_spatial=True, spatial_size=(32,
                 img_features.append(hist_features)
             # include hog features
             if include_hog:
-                hf1, hf2, hf3 = get_hog_feature_all_channels(feature_image, orient, pix_per_cell, cell_per_block)
-                hog_features = np.hstack((hf1.ravel(), hf2.ravel(), hf3.ravel()))
+                #hf1, hf2, hf3 = get_hog_feature_all_channels(feature_image, orient, pix_per_cell, cell_per_block)
+                #hog_features = np.hstack((hf1.ravel(), hf2.ravel(), hf3.ravel()))
+                hf1 = get_hog_feature_all_channels(feature_image, orient, pix_per_cell, cell_per_block)
+                hog_features = hf1.ravel()
                 img_features.append(hog_features)
             # Append the new feature vector to the features list
             features.append(np.concatenate(img_features))
     # Return list of feature vectors
     return features
-
-# Define a function that takes an image,
-# start and stop positions in both x and y, 
-# window size (x and y dimensions),  
-# and overlap fraction (for both x and y)
-def get_windows(img, x_start_stop=[None, None], y_start_stop=[None, None], 
-                    xy_window=(64, 64), xy_overlap=(0.5, 0.5)):
-    # If x and/or y start/stop positions not defined, set to image size
-    if x_start_stop[0] == None:
-        x_start_stop[0] = 0
-    if x_start_stop[1] == None:
-        x_start_stop[1] = img.shape[1]
-    if y_start_stop[0] == None:
-        y_start_stop[0] = img.shape[0]//2
-    if y_start_stop[1] == None:
-        y_start_stop[1] = img.shape[0]
-    # Compute the span of the region to be searched    
-    xspan = x_start_stop[1] - x_start_stop[0]
-    yspan = y_start_stop[1] - y_start_stop[0]
-    # Compute the number of pixels per step in x/y
-    nx_pix_per_step = np.int(xy_window[0]*(1 - xy_overlap[0]))
-    ny_pix_per_step = np.int(xy_window[1]*(1 - xy_overlap[1]))
-    # Compute the number of windows in x/y
-    nx_buffer = np.int(xy_window[0]*(xy_overlap[0]))
-    ny_buffer = np.int(xy_window[1]*(xy_overlap[1]))
-    nx_windows = np.int((xspan-nx_buffer)/nx_pix_per_step) 
-    ny_windows = np.int((yspan-ny_buffer)/ny_pix_per_step) 
-    # Initialize a list to append window positions to
-    window_list = []
-    # Loop through finding x and y window positions
-    for ys in range(ny_windows):
-        for xs in range(nx_windows):
-            # Calculate window position
-            startx = xs*nx_pix_per_step + x_start_stop[0]
-            endx = startx + xy_window[0]
-            starty = ys*ny_pix_per_step + y_start_stop[0]
-            endy = starty + xy_window[1]
-            # Append window position to list
-            window_list.append(((startx, starty), (endx, endy)))
-    # Return the list of windows
-    return window_list
-

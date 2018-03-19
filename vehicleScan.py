@@ -12,13 +12,58 @@ class Window:
         self.x_range_img = []
         self.y_range_img = []
 
+
+# Define a function that takes an image,
+# start and stop positions in both x and y, 
+# window size (x and y dimensions),  
+# and overlap fraction (for both x and y)
+def get_windows(img, x_start_stop=[None, None], y_start_stop=[None, None], 
+                    xy_window=(64, 64), xy_overlap=(0.5, 0.5), draw=False):
+    # If x and/or y start/stop positions not defined, set to image size
+    if x_start_stop[0] == None:
+        x_start_stop[0] = 0
+    if x_start_stop[1] == None:
+        x_start_stop[1] = img.shape[1]
+    if y_start_stop[0] == None:
+        y_start_stop[0] = img.shape[0]//2
+    if y_start_stop[1] == None:
+        y_start_stop[1] = img.shape[0]
+    # Compute the span of the region to be searched    
+    xspan = x_start_stop[1] - x_start_stop[0]
+    yspan = y_start_stop[1] - y_start_stop[0]
+    # Compute the number of pixels per step in x/y
+    nx_pix_per_step = np.int(xy_window[0]*(1 - xy_overlap[0]))
+    ny_pix_per_step = np.int(xy_window[1]*(1 - xy_overlap[1]))
+    # Compute the number of windows in x/y
+    nx_buffer = np.int(xy_window[0]*(xy_overlap[0]))
+    ny_buffer = np.int(xy_window[1]*(xy_overlap[1]))
+    nx_windows = np.int((xspan-nx_buffer)/nx_pix_per_step) 
+    ny_windows = np.int((yspan-ny_buffer)/ny_pix_per_step) 
+    # Initialize a list to append window positions to
+    window_list = []
+    # Loop through finding x and y window positions
+    for ys in range(ny_windows):
+        for xs in range(nx_windows):
+            # Calculate window position
+            startx = xs*nx_pix_per_step + x_start_stop[0]
+            endx = startx + xy_window[0]
+            starty = ys*ny_pix_per_step + y_start_stop[0]
+            endy = starty + xy_window[1]
+            # Append window position to list
+            if draw:
+                cv2.rectangle(img, (startx, starty), (endx, endy), (0,0,255), 4)
+            window_list.append(((startx, starty), (endx, endy)))
+    # Return the list of windows
+    return window_list
+
+
 # get prediction for each window
 def get_predictions(classifier, Xscaler, img, all_windows, hog_features, y_start_pos, x_start_pos, cell_per_block, pix_per_cell,
                     inc_spatial, inc_hist, spatial_size = (32, 32), hist_bins = 32, hist_range = (0, 256)):
     predictions = []
-    hog_f1 = hog_features[0]
-    hog_f2 = hog_features[1]
-    hog_f3 = hog_features[2]
+    hog_f1 = hog_features#[0]
+    #hog_f2 = hog_features[1]
+    #hog_f3 = hog_features[2]
     # loop over windows to get features for
     for i in range(len(all_windows)):
         win_features = []
@@ -50,13 +95,10 @@ def get_predictions(classifier, Xscaler, img, all_windows, hog_features, y_start
             predictions.append(0)
             continue
         hog_ch1 = hog_f1[hys:hye, hxs:hxe].ravel()
-        hog_ch2 = hog_f2[hys:hye, hxs:hxe].ravel()
-        hog_ch3 = hog_f3[hys:hye, hxs:hxe].ravel()
-        #print(hys, hye, hxs, hxe, hog_f1[hys:hye, hxs:hxe].shape)
-        hgf = np.hstack((hog_ch1, hog_ch2, hog_ch3))
+        #hog_ch2 = hog_f2[hys:hye, hxs:hxe].ravel()
+        #hog_ch3 = hog_f3[hys:hye, hxs:hxe].ravel()
+        hgf = hog_ch1#np.hstack((hog_ch1, hog_ch2, hog_ch3))
         win_features.append(hgf)
-        #features.append(win_features)
-        #print(win_features[0].shape, win_features[1].shape, win_features[2].shape, x_start_pos)
         test_features = Xscaler.transform(np.hstack(win_features).reshape(1, -1))
         predictions.append(classifier.predict(test_features))
     return np.array(predictions)
@@ -68,12 +110,15 @@ def cool_heat(hot_img, threshold):
     
 # find cars in given image by using the given trained classifier and all other parameters
 def find_cars(img, classifier, Xscaler, orient, pix_per_cell, cell_per_block, inc_spatial, spatial,
-                inc_hist, hbins, overlap, trained_win_size, all_windows):
-    # output blank heatmap
+                inc_hist, hbins, overlap, trained_win_size, all_windows, draw_detections=False):
+    # output blank heatmap of floating point numbers
     hot_img = np.zeros_like(img[:,:,0])
-    hot_img.astype(np.int)
+    hot_img.astype(np.float64)
     # convert to LUV colorspace
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2YUV)
+    dimg = None
+    if draw_detections:
+        dimg = np.copy(img)
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2LUV)
     # find boxes and hog features for entire area to be scanned for each window size
     for win_size in all_windows:
         x_range_img = all_windows[win_size].x_range_img
@@ -102,12 +147,15 @@ def find_cars(img, classifier, Xscaler, orient, pix_per_cell, cell_per_block, in
         # get indexes on non-zero(car) predictions
         hot_indexes = np.array((predictions.nonzero())[0])
         # add heat to hot_img
-        #print(all_windows[win_sizes[i]].hot_indexes)
         for ind in hot_indexes:
             # get corners x-y from hot windows
             tlt, brt = all_windows[win_size].windows[ind]
             #weights proportional to size of the window
             hot_img[tlt[1]:brt[1]+1, tlt[0]:brt[0]+1] = hot_img[tlt[1]:brt[1]+1, tlt[0]:brt[0]+1] + 1
+            if draw_detections:
+                cv2.rectangle(dimg, (tlt[0], tlt[1]), (brt[0], brt[1]), (0,0,255), 4)
+    if draw_detections:
+        return hot_img, dimg
     return hot_img
 
 def draw_labeled_bboxes(img, labels):
@@ -122,11 +170,13 @@ def draw_labeled_bboxes(img, labels):
         # Define a bounding box based on min/max x and y
         bbox = ((np.min(nonzerox), np.min(nonzeroy)), (np.max(nonzerox), np.max(nonzeroy)))
         # Draw the box on the image
-        if 2*w//8 >= abs(bbox[0][0]-bbox[1][0]) >= w//24 and abs(bbox[0][1]-bbox[1][1]) >= h//24:
-            cv2.rectangle(img, bbox[0], bbox[1], (0,0,255), 6)
+        if w//2 >= abs(bbox[0][0]-bbox[1][0]) >= 40 and abs(bbox[0][1]-bbox[1][1]) >= 40:
+            cv2.rectangle(img, bbox[0], bbox[1], (0,0,255), 4)
     # Return the image
     return img
-	
+
+# process image and return the heat map for the deteced objects.
+# To be utilized in multithreaded environment
 def process_image(img, svc, X_scaler, pdata):
 	# get the heat ap from the processed image
     heat_map = find_cars(img, svc, X_scaler, pdata["orient"],
@@ -134,29 +184,35 @@ def process_image(img, svc, X_scaler, pdata):
                         pdata["inc_hist"], pdata["hbins"], pdata["overlap"], pdata["trained_win_size"], pdata["windows"])
     return heat_map
 
+frames_sum = None
+
 def get_processed_frame(img):
-    global hot_frames, svc, X_scaler, proc_data
+    global hot_frames, frames_sum, svc, X_scaler, proc_data
+    # float64 type heat map
+    heat_map = find_cars(img, svc, X_scaler, proc_data["orient"],
+                        proc_data["pix_per_cell"], proc_data["cell_per_block"], proc_data["inc_spatial"], proc_data["spatial"],
+                        proc_data["inc_hist"], proc_data["hbins"], proc_data["overlap"], proc_data["trained_win_size"], proc_data["windows"])
     
-    heat_map = process_image(img, svc, X_scaler, proc_data)
-    
-    heat_map.astype(np.float64)
-    nheat_map = np.zeros_like(heat_map)
     fln = len(hot_frames)
-    for i in range(fln):
-        nheat_map = nheat_map + hot_frames[i]
-    nheat_map = (nheat_map + heat_map)/(fln+1)
-    
-    nheat_map = (nheat_map/np.max(nheat_map))*255
+	# if first frame, initialize sum of frames to be zero, then just add current frame to it, to get total heat
+    if fln == 0:
+	    frames_sum = np.copy(heat_map)
+    else:
+        frames_sum = frames_sum + heat_map
+    # normalize the heatmap to be in range 0-255 and change data type to be uint8
+    nheat_map = (frames_sum/np.max(frames_sum))*254
     nheat_map.astype(np.uint8)
-    # remove unwanted heat by thresholding
-    nheat_map = cool_heat(nheat_map, 115)
-    # add frame to buffer
-    hot_frames.append(cool_heat(heat_map, 13))
-    if len(hot_frames) > 10:
+    # remove unwanted heat by thresholding and smoothen the output using gaussian blur
+    nheat_map = cool_heat(nheat_map, 50)
+    nheat_map = cv2.GaussianBlur(nheat_map, (5,5), 0)
+    # add frame to buffer and update sum of frames, addition of current frame is already done
+    hot_frames.append(heat_map)
+    if len(hot_frames) > 20:
+        frames_sum = frames_sum - hot_frames[0]
         hot_frames.pop(0)
-    # generate labels for hot boxes
-    labels = label(nheat_map)
-    op = draw_labeled_bboxes(img, labels)
+    # generate labels for hot boxes and draw them onto output image
+    op = draw_labeled_bboxes(img, label(nheat_map))
+	# superimpose heatmap on one corner fo output video
     mini_hm = cv2.resize(nheat_map, (360, 240))
     mini_hm = np.dstack((mini_hm, np.zeros_like(mini_hm), np.zeros_like(mini_hm)))
     op[0:240, op.shape[1]-360:op.shape[1]] = mini_hm
