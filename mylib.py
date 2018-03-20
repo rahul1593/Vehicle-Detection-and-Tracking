@@ -47,6 +47,7 @@ def get_hog_features(img, orient, pix_per_cell, cell_per_block,
 
 
 # get hog features for all image channels
+# Using single channel at the moment
 def get_hog_feature_all_channels(img, orient, pix_per_cell, cell_per_block):
     ch1 = img[:,:,0]
     ch2 = img[:,:,1]

@@ -158,6 +158,7 @@ def find_cars(img, classifier, Xscaler, orient, pix_per_cell, cell_per_block, in
         return hot_img, dimg
     return hot_img
 
+#draw the boxes
 def draw_labeled_bboxes(img, labels):
     h, w = img.shape[:2]
     # Iterate through all detected cars
@@ -171,7 +172,7 @@ def draw_labeled_bboxes(img, labels):
         bbox = ((np.min(nonzerox), np.min(nonzeroy)), (np.max(nonzerox), np.max(nonzeroy)))
         # Draw the box on the image
         if w//2 >= abs(bbox[0][0]-bbox[1][0]) >= 40 and abs(bbox[0][1]-bbox[1][1]) >= 40:
-            cv2.rectangle(img, bbox[0], bbox[1], (0,0,255), 4)
+            cv2.rectangle(img, bbox[0], bbox[1], (0,0,255), 6)
     # Return the image
     return img
 
@@ -184,8 +185,9 @@ def process_image(img, svc, X_scaler, pdata):
                         pdata["inc_hist"], pdata["hbins"], pdata["overlap"], pdata["trained_win_size"], pdata["windows"])
     return heat_map
 
+# variable to store sum of frames
 frames_sum = None
-
+# get the frame with bounding box drawn on the input image
 def get_processed_frame(img):
     global hot_frames, frames_sum, svc, X_scaler, proc_data
     # float64 type heat map
@@ -203,7 +205,7 @@ def get_processed_frame(img):
     nheat_map = (frames_sum/np.max(frames_sum))*254
     nheat_map.astype(np.uint8)
     # remove unwanted heat by thresholding and smoothen the output using gaussian blur
-    nheat_map = cool_heat(nheat_map, 80)
+    nheat_map = cool_heat(nheat_map, 50)
     nheat_map = cv2.GaussianBlur(nheat_map, (5,5), 0)
     # add frame to buffer and update sum of frames, addition of current frame is already done
     hot_frames.append(heat_map)
