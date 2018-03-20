@@ -87,7 +87,7 @@ To improve performance, I create the windows only once and use them repeatedly i
 The entire pipeline for video is same as for single image, except for the function called to get the output for each frame. This function (`get_processed_frame`) is defined in file `vehicleScan.py` at line number 189.
 
 Here's a link to my video result.
-![alt text][op_vid]
+https://github.com/rahul1593/Vehicle-Detection-and-Tracking/raw/master/output_videos/project_video.mp4
 
 #### 2. Pipeline Implementation.
 
