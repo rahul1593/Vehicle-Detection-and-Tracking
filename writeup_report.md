@@ -16,14 +16,14 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image0]: ./output_images/car_n_car.jpg
-[image1]: ./output_images/car_hog.jpg "Car Hog features"
-[image2]: ./output_images/notcar_hog.jpg "Not Car hog features"
-[image3]: ./output_images/roi_bb.jpg "Region of Interset for sliding window search"
-[image4]: ./output_images/hmap_bb.jpg "Output of pipeline"
-[image5]: ./output_images/multiple_bb.jpg "Multiple Detections"
-[image6]: ./output_images/labels.jpg "Label"
-[image7]: ./output_images/combined_bb.jpg "Single Bounding Box"
+[image0]: ./output_images/car_n_car.JPG "Car-Not-Car Image"
+[image1]: ./output_images/car_hog.JPG "Car Hog features"
+[image2]: ./output_images/notcar_hog.JPG "Not Car hog features"
+[image3]: ./output_images/roi_bb.JPG "Region of Interset for sliding window search"
+[image4]: ./output_images/hmap_bb.JPG "Output of pipeline"
+[image5]: ./output_images/multiple_bb.JPG "Multiple Detections"
+[image6]: ./output_images/labels.JPG "Label"
+[image7]: ./output_images/combined_bb.JPG "Single Bounding Box"
 
 
 #### 1. Extracting HOG features from the training images
