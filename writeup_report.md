@@ -16,7 +16,7 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image0]: ./output_images/car_n_car.jpg "Car-Not-Car Image"
+[image0]: ./output_images/car_n_car.jpg
 [image1]: ./output_images/car_hog.jpg "Car Hog features"
 [image2]: ./output_images/notcar_hog.jpg "Not Car hog features"
 [image3]: ./output_images/roi_bb.jpg "Region of Interset for sliding window search"
