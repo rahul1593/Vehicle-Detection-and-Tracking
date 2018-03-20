@@ -46,7 +46,7 @@ Following example uses the LUV color space and HOG parameters of orientations=11
 
 #### 2. Choice of HOG parameters and other features.
 
-I tried various combinations of parameters and color spaces. RGB colorspace could not give high accuracy on test dataset. HSV and HLS colorspaces were marginally better than RGB, but YUV and LUV colorspace were able to give highest accuracies with LUV giving the highest accuracy with less orientiations. *cells_per_block* and *pixels_per_cell* for HOG were set to __2__ and __8__ which gave highest accuracy with __11__ orientations.
+I tried various combinations of parameters and color spaces. RGB colorspace could not give high accuracy on test dataset. HSV and HLS colorspaces were marginally better than RGB, but YUV and LUV colorspace were able to give highest accuracies with LUV giving the highest accuracy with less orientiations. *cells_per_block* and *pixels_per_cell* for HOG were set to __2__ and __8__ which gave highest accuracy with __11__ orientations. I used only first(L) channel of LUV image, because it is enough for the classifier to give good output and save on computations.
 
 Along with HOG, I also used spatial features with size of _16x16_ and color histogram features with bin size _32_ to get more accurate output.
 
