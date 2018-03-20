@@ -24,9 +24,7 @@ The goals / steps of this project are the following:
 [image5]: ./output_images/multiple_bb.jpg "Multiple Detections"
 [image6]: ./output_images/labels.jpg "Label"
 [image7]: ./output_images/combined_bb.jpg "Single Bounding Box"
-[image8]: ./output_images/not_car.jpg " "
-[image9]: ./output_images/not_car.jpg " "
-[image10]: ./output_images/not_car.jpg " "
+
 
 #### 1. Extracting HOG features from the training images
 
