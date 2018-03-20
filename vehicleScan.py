@@ -203,7 +203,7 @@ def get_processed_frame(img):
     nheat_map = (frames_sum/np.max(frames_sum))*254
     nheat_map.astype(np.uint8)
     # remove unwanted heat by thresholding and smoothen the output using gaussian blur
-    nheat_map = cool_heat(nheat_map, 50)
+    nheat_map = cool_heat(nheat_map, 80)
     nheat_map = cv2.GaussianBlur(nheat_map, (5,5), 0)
     # add frame to buffer and update sum of frames, addition of current frame is already done
     hot_frames.append(heat_map)
