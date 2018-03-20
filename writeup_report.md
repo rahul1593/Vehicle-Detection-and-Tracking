@@ -24,7 +24,7 @@ The goals / steps of this project are the following:
 [image5]: ./output_images/multiple_bb.JPG "Multiple Detections"
 [image6]: ./output_images/labels.JPG "Label"
 [image7]: ./output_images/combined_bb.JPG "Single Bounding Box"
-
+[op_vid]: ./output_videos/project_video.mp4 "Output Video"
 
 #### 1. Extracting HOG features from the training images
 
@@ -87,7 +87,7 @@ To improve performance, I create the windows only once and use them repeatedly i
 The entire pipeline for video is same as for single image, except for the function called to get the output for each frame. This function (`get_processed_frame`) is defined in file `vehicleScan.py` at line number 189.
 
 Here's a link to my video result.
-<link>
+![alt text][op_vid]
 
 #### 2. Pipeline Implementation.
 
