@@ -1,6 +1,6 @@
 # Vehicle Detection and Tracking
 
-In this project, I have implemented a pipeline to find the cars in a video of moving cars on road by using HOG features and color histograms for training an Support Vector Classifier with "rbf" kernel, which is later used for classification.
+In this project, I have implemented a pipeline to find the cars in a video of moving cars on road by using HOG features and color histograms for training a Support Vector Classifier with "rbf" kernel, which is later used for classification.
 
 ## Important Files and Directories
 
